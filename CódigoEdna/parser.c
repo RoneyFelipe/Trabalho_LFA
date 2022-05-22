@@ -22,7 +22,7 @@ Gramática da linguagem aceita pelo parser:
  E'-> +TE' 
       | epsilon
  T -> FT'
- T'-> *FT' 
+ T'-> *FT' // * é só um operador da linguagem
       | epsilon
  F -> (E) 
       | id 
@@ -44,12 +44,12 @@ FILE *fin;
 /* Exige que o próximo terminal seja t e avança o ponteiro da fita de entrada (i.e., pega o próximo terminal) */
 void match(int t)
 {
-  if(lookahead==t){
-    lookahead=lex();
+  if(lookahead == t){
+    lookahead = lex();
   }
   else{
      printf("\nErro(linha=%d): token %s (cod=%d) esperado.## Encontrado \"%s\" ##\n", lines, terminalName[t], t, lexema);
-    exit(1);
+     exit(1);
   }
 }
 
@@ -63,7 +63,7 @@ void S(){
       | epsilon
 */
 void S_(){
-  if(lookahead==INT || lookahead==FLOAT || lookahead==VOID){
+  if(lookahead == INT || lookahead == FLOAT || lookahead == VOID){
     Function();
     S_();
   }
@@ -141,6 +141,16 @@ void C(){
     match(FECHA_PARENT);
     C();
   }
+  else if(lookahead == SWITCH){
+    match(SWITCH);
+    match(ABRE_PARENT);
+    C_(); 
+    match(FECHA_PARENT);
+    
+    match(ABRE_CHAVES);
+    CASE(); 
+    match(FECHA_CHAVES);
+  }
   else {
     match(ABRE_CHAVES);
     B();
@@ -190,10 +200,99 @@ void F(){
     if(lookahead==ID){
       match(ID);
     }
-    else
+    else {
       match(NUM);
+    }
+  }
+
+}
+
+/* CASE -> CASE_CONDICAO CASE_ 
+        | CASE_CONDICAO C   
+        | Epsilon                  */
+void CASE() {
+  if(lookahead == CASE) {
+    match(CASE);
+    CASE_CONDICAO();
+    CASE_();
+    
+  } 
+  else if (lookahead == DEFAULT){
+    match(DEFAULT);
+    CASE_CONDICAO();
+    C();
+    if(lookahead == BREAK){
+      match(BREAK);
+    }
   }
 }
+
+/* CASE_ -> CASE
+          | C CASE  */
+void CASE_(){
+  if(lookahead == CASE){
+      CASE();
+
+  } else if(lookahead == BREAK) {
+    match(BREAK);
+    match(PONTO_VIRG);
+    CASE();
+
+  } else {
+    C();
+    if(lookahead == BREAK){
+      match(BREAK);
+    }
+    match(PONTO_VIRG);
+    CASE();
+  }
+}
+
+/* CASE_CONDICAO -> C_    */
+void CASE_CONDICAO() {
+
+  if(lookahead == ABRE_PARENT) {
+      match(ABRE_PARENT);
+      C_();
+      match(FECHA_PARENT);
+  }
+  else {
+      C_();
+    match(DOT_DOT);
+  }
+}
+
+/* C_ -> EXP_CASE */
+void C_() {
+  if(lookahead == ID) {
+    match(ID);
+    EXP_CASE();
+  }
+  else {
+    match(NUM);
+    EXP_CASE();
+  }
+}
+
+/* EXP_CASE -> C_ 
+              | Epsilon      */
+void EXP_CASE() {
+  if(lookahead == OP_ADIT){
+    match(OP_ADIT);
+    C_();
+  } else if(lookahead == OP_MULT){
+    match(OP_MULT);
+    C_();
+  } else if(lookahead == OP_MINUS){
+    match(OP_MINUS);
+    C_();
+  } else if(lookahead == OP_DIV){
+    match(OP_DIV);
+    C_();
+  }
+  // VAZIA
+}
+
 
 /*******************************************************************************************
  parser(): 
@@ -202,9 +301,9 @@ void F(){
 ********************************************************************************************/
 char *parser()
 {
-   lookahead=lex(); // inicializa lookahead com o primeiro terminal da fita de entrada (arquivo)
+   lookahead = lex(); // inicializa lookahead com o primeiro terminal da fita de entrada (arquivo)
    S(); // chama a variável inicial da gramática.
-   if(lookahead==FIM)
+   if(lookahead == FIM)
       return("Programa sintaticamente correto!");
    else
       return("Fim de arquivo esperado");
@@ -212,7 +311,7 @@ char *parser()
 
 int main(int argc, char**argv)
 {
-  if(argc<2){
+  if(argc < 2){
     printf("\nUse: compile <filename>\n");
     return 1;
   }

@@ -20,5 +20,10 @@ void T();
 void F();
 void E_();
 void T_();
+void CASE();
+void CASE_();
+void CASE_CONDICAO();
+void C_();
+void EXP_CASE();
 
 #endif

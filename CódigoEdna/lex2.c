@@ -19,13 +19,14 @@ char c;          /* armazena caracter lido da entrada */
 // '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '[', ']', '{', '|', '}'
 
 char *keywords[] = { /* palavras reservadas da linguagem */
-  "break", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while"
+  "break", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while", "case"
 };
+// break = 0
 
 
 char *terminalName[] = { /* nome dos terminais aceitos pelo automato */
   "break", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while", "id", "num", "OP_ATRIB", "OP_ADIT", "OP_MULT", "OP_REL", "ABRE_PARENT", "FECHA_PARENT", "PONTO_VIRG", 
-  "VIRG", "ABRE_CHAVES", "FECHA_CHAVES", "CARACTER", "STRING", "OP_BIT_A_BIT_AND", "OP_BIT_A_BIT_OR", "OP_LOGICO", "OP_CASE", "ABRE_COLC", "FECHA_COLC", "PONTO", "OP_MINUS", "OP_MINUSMINUS", "OP_PONT", "OP_PLUSPLUS", "DOT_DOT","OP_NOT","OP_DIV", "FIM"
+  "VIRG", "ABRE_CHAVES", "FECHA_CHAVES", "CARACTER", "STRING", "OP_BIT_A_BIT_AND", "OP_BIT_A_BIT_OR", "OP_LOGICO", "OP_CASE", "ABRE_COLC", "FECHA_COLC", "PONTO", "OP_MINUS", "OP_MINUSMINUS", "OP_PONT", "OP_PLUSPLUS", "DOT_DOT","OP_NOT","OP_DIV", "FIM", "case"
 };
 
 
