@@ -42,253 +42,406 @@ int lookahead;
 FILE *fin;
 
 /* Exige que o próximo terminal seja t e avança o ponteiro da fita de entrada (i.e., pega o próximo terminal) */
-void match(int t)
-{
-  if(lookahead == t){
+void match(int t) {
+
+  if (lookahead == t) {
+    
     lookahead = lex();
+    
   }
-  else{
-     printf("\nErro(linha=%d): token %s (cod=%d) esperado.## Encontrado \"%s\" ##\n", lines, terminalName[t], t, lexema);
-     exit(1);
+  else {
+    
+    printf("\nErro(linha=%d): token %s (cod=%d) esperado.## Encontrado \"%s\" ##\n", lines, terminalName[t], t, lexema);
+    exit(1);
+     
   }
 }
 
 // S  -> Function S_ 
-void S(){
+void S() {
+  
   Function();
   S_();
+  
 }
 
 /* S_ -> Function S_ 
       | epsilon
 */
-void S_(){
-  if(lookahead == INT || lookahead == FLOAT || lookahead == VOID){
+void S_() {
+
+  if (lookahead == INT || lookahead == FLOAT || lookahead == VOID) {
+
     Function();
     S_();
+    
   }
+
 }
 
 // Function -> Type Function_
-void Function(){
+void Function() {
+
   Type();
   Function_();
+
 }
 
 /* Type -> void 
        | int 
        | float
 */
-void Type(){  
-  if(lookahead==INT){
+void Type() {  
+
+  if (lookahead == INT) {
+    
     match(INT);
+
   }
-  else if(lookahead==FLOAT){
+
+  else if (lookahead == FLOAT) {
+
     match(FLOAT);
+
   }
-  else{
+
+  else {
+    
     match(VOID);
+    
   }
+
 }
 
 /* Function_ -> main() { B } 
             | id() { B }
 */
-void Function_(){
-  if(lookahead == MAIN){
+void Function_() {
+
+  if (lookahead == MAIN) {
+
     match(MAIN);
     match(ABRE_PARENT);
     match(FECHA_PARENT);
     match(ABRE_CHAVES);
     B();
     match(FECHA_CHAVES);
+
   }
-  else{
+
+  else {
+
     match(ID);
     match(ABRE_PARENT);
     match(FECHA_PARENT);
     match(ABRE_CHAVES);
     B();
     match(FECHA_CHAVES);
+
   }
+
 }
 
 /* B -> C B 
       | epsilon
 */
-void B(){
-  if(lookahead==ID || lookahead==WHILE || lookahead==ABRE_CHAVES){
+void B() {
+  
+  if (lookahead == ID || lookahead == WHILE || lookahead == ABRE_CHAVES || lookahead == SWITCH) {
+
     C();
     B();
+
   }
+
 }
 /*
  C -> id = E ; 
       | while (E) C 
       | { B }
 */
-void C(){
-   if(lookahead==ID){ //id = E ;
+void C() {
+
+   if (lookahead == ID) { //id = E ;
+    
     match(ID);
     match(OP_ATRIB);
     E();
     match(PONTO_VIRG);
+
   }
-  else if(lookahead==WHILE){
+
+  else if (lookahead == WHILE) {
+
     match(WHILE);
     match(ABRE_PARENT);
     E();
     match(FECHA_PARENT);
     C();
+
   }
-  else if(lookahead == SWITCH){
+
+  else if (lookahead == SWITCH) {
+
     match(SWITCH);
     match(ABRE_PARENT);
     C_(); 
     match(FECHA_PARENT);
     
     match(ABRE_CHAVES);
-    CASE(); 
+    F_CASE(); 
     match(FECHA_CHAVES);
+
   }
+
   else {
     match(ABRE_CHAVES);
     B();
     match(FECHA_CHAVES);
+
   }
+
 }
 // E-> T E_
-void E(){
+void E() {
+
   T();
   E_();
+
 }
 // T -> FT'
-void T(){
+void T() {
+
   F();
   T_();
+
 }
 // E_ -> + T E_ | epsilon
-void E_(){
-  if(lookahead==OP_ADIT){
+void E_() {
+  if (lookahead == OP_ADIT) {
+
     match(OP_ADIT);
     T();
     E_();
+
   }
+
 }
 /* T'-> *FT' 
       | epsilon
 */
-void T_(){
-  if(lookahead==OP_MULT){
+void T_() {
+
+  if (lookahead == OP_MULT) {
+
     match(OP_MULT);
     F();
     T_();
+
   }
+
 }
 /*
- F -> (E) 
-      | id 
+ F -> (E), 
+      | id, 
       | num
 */
 void F(){
-  if(lookahead==ABRE_PARENT){
+
+  if (lookahead == ABRE_PARENT) {
+
     match(ABRE_PARENT);
     E();
     match(FECHA_PARENT);
+
   }
-  else{
-    if(lookahead==ID){
+
+  else {
+
+    if (lookahead==ID){
       match(ID);
+
     }
+
     else {
+
       match(NUM);
     }
   }
 
 }
 
-/* CASE -> CASE_CONDICAO CASE_ 
-        | CASE_CONDICAO C   
-        | Epsilon                  */
-void CASE() {
-  if(lookahead == CASE) {
+/* F_CASE -> CASE_CONDICAO CASE_, 
+        | CASE_CONDICAO C,
+        | Epsilon */
+/*Analisa o corpo do case ou  default*/
+void F_CASE() {
+  
+  if (lookahead == CASE) {
+
     match(CASE);
     CASE_CONDICAO();
     CASE_();
-    
+
   } 
-  else if (lookahead == DEFAULT){
+
+  else if (lookahead == DEFAULT) {
+
     match(DEFAULT);
-    CASE_CONDICAO();
+    // O case condição não está aqui pois o default não tem condição já que ele é a opção de queda quando nenhuma
+    // outra condição é atendida
+    match(DOT_DOT);
     C();
-    if(lookahead == BREAK){
+
+    if (lookahead == BREAK) {
+
       match(BREAK);
+      match(PONTO_VIRG);
+      
     }
+
   }
+
 }
 
-/* CASE_ -> CASE
-          | C CASE  */
-void CASE_(){
-  if(lookahead == CASE){
-      CASE();
+/* CASE_ -> F_CASE
+          | C F_CASE  */
+/*Funcao responsavel por ler o corpo do case, ela não analisa o termo CASE responsvel pela chamada de 
+F_case() e nem a condicao de tal. */
+void CASE_() {
 
-  } else if(lookahead == BREAK) {
+  /*Se um novo termo CASE for encontrado, a funcao F_case() deve ser conjurada para que a analise seja feita. */
+  if (lookahead == CASE) {
+
+    F_CASE();
+
+  } 
+  
+  /**/
+  else if (lookahead == BREAK) {
+
     match(BREAK);
     match(PONTO_VIRG);
-    CASE();
+    F_CASE();
 
-  } else {
+  } 
+  
+  else {
+
     C();
-    if(lookahead == BREAK){
+
+    if (lookahead == BREAK) {
+
       match(BREAK);
+      match(PONTO_VIRG);
+
     }
-    match(PONTO_VIRG);
-    CASE();
+
+    F_CASE();
+
   }
+
 }
 
 /* CASE_CONDICAO -> C_    */
+/*Analisa a condicao do case*/
 void CASE_CONDICAO() {
 
-  if(lookahead == ABRE_PARENT) {
+  /*Se lookahead for igual a um abre parenteses, verificamos o abre parenteses, analisamos o corpo da expressao*/
+  /*e verificamos o fechamento de parenteses*/
+  if (lookahead == ABRE_PARENT) {
+
       match(ABRE_PARENT);
       C_();
       match(FECHA_PARENT);
+      match(DOT_DOT);
+
   }
+  /*Se lookahead nao for igual a abre parenteses, significa que já estamos no corpo da condição. Então, verificamos*/
+  /*o corpo da condicao e os dois pontos*/
   else {
-      C_();
+
+    C_();
     match(DOT_DOT);
+
   }
+
 }
 
 /* C_ -> EXP_CASE */
+/*Funcao responsavel por verificar se o que foi lido e uma variavel ou um valor real.*/
 void C_() {
-  if(lookahead == ID) {
-    match(ID);
-    EXP_CASE();
+
+  /*Se lookahead for igual a uma variavel*/
+  if (lookahead == ID) {
+
+    if(lookahead == ABRE_PARENT){
+    
+      match(ABRE_PARENT);
+      match(ID);
+      EXP_CASE();
+      match(FECHA_PARENT);
+      
+    } 
+    /*Se lookahead for igual a um valor real.*/
+    else {
+      
+      match(ID);
+      EXP_CASE();
+
+    }
+    
   }
+
   else {
-    match(NUM);
-    EXP_CASE();
+
+    /*Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((13)) */
+    if(lookahead == ABRE_PARENT){
+      match(ABRE_PARENT);
+      match(NUM);
+      EXP_CASE();
+      match(FECHA_PARENT);
+    } 
+    
+    else {
+      match(NUM);
+      EXP_CASE();
+    }
+
   }
+
 }
 
 /* EXP_CASE -> C_ 
               | Epsilon      */
 void EXP_CASE() {
-  if(lookahead == OP_ADIT){
+  
+  if (lookahead == OP_ADIT) {
+
     match(OP_ADIT);
     C_();
-  } else if(lookahead == OP_MULT){
+
+  } 
+  
+  else if (lookahead == OP_MULT) {
+
     match(OP_MULT);
     C_();
-  } else if(lookahead == OP_MINUS){
+
+  } 
+  
+  else if (lookahead == OP_MINUS) {
+
     match(OP_MINUS);
     C_();
-  } else if(lookahead == OP_DIV){
+
+  } 
+  
+  else if (lookahead == OP_DIV) {
+
     match(OP_DIV);
     C_();
+
   }
   // VAZIA
 }
@@ -299,33 +452,45 @@ void EXP_CASE() {
  - efetua o processamento do automato com pilha AP
  - devolve uma mensagem para indicar se a "palavra" (programa) estah sintaticamente correta.
 ********************************************************************************************/
-char *parser()
-{
+char *parser () {
+
    lookahead = lex(); // inicializa lookahead com o primeiro terminal da fita de entrada (arquivo)
+
    S(); // chama a variável inicial da gramática.
+
    if(lookahead == FIM)
       return("Programa sintaticamente correto!");
    else
       return("Fim de arquivo esperado");
+
 }
 
-int main(int argc, char**argv)
-{
-  if(argc < 2){
+int main(int argc, char**argv) {
+
+  if(argc < 2) {
+
     printf("\nUse: compile <filename>\n");
     return 1;
+
   }
-  else{
+
+  else {
+
     printf("\nAnalisando lexica e sintaticamente o programa: %s", argv[1]);
     fin=fopen(argv[1], "r");
-    if(!fin){
+
+    if(!fin) {
+
       printf("\nProblema na abertura do programa %s\n", argv[1]);
       return 1;
+
     }
     // chama o parser para processar o arquivo de entrada
     printf("\nTotal de linhas processadas: %d\nResultado: %s\n", lines, parser());
     fclose(fin);
     return 0;
+
   }
+
 }
 

@@ -1,5 +1,5 @@
 /*
- lexv2.c : analisador lexico (automato finito sem tabela de transições. As transições estão codificadas no lex())
+ lex2.c : analisador lexico (automato finito sem tabela de transições. As transições estão codificadas no lex())
  Autor: Edna A. Hoshino
  Em: novembro/2021
 */
@@ -19,14 +19,14 @@ char c;          /* armazena caracter lido da entrada */
 // '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '[', ']', '{', '|', '}'
 
 char *keywords[] = { /* palavras reservadas da linguagem */
-  "break", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while", "case"
+  "break", "case","char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while"
 };
-// break = 0
+// keyword = 0 - 16
 
 
 char *terminalName[] = { /* nome dos terminais aceitos pelo automato */
-  "break", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while", "id", "num", "OP_ATRIB", "OP_ADIT", "OP_MULT", "OP_REL", "ABRE_PARENT", "FECHA_PARENT", "PONTO_VIRG", 
-  "VIRG", "ABRE_CHAVES", "FECHA_CHAVES", "CARACTER", "STRING", "OP_BIT_A_BIT_AND", "OP_BIT_A_BIT_OR", "OP_LOGICO", "OP_CASE", "ABRE_COLC", "FECHA_COLC", "PONTO", "OP_MINUS", "OP_MINUSMINUS", "OP_PONT", "OP_PLUSPLUS", "DOT_DOT","OP_NOT","OP_DIV", "FIM", "case"
+  "break", "case", "char", "default", "do", "double", "else", "float","for", "if", "int", "main", "return", "struct", "switch", "void", "while", "id", "num", "OP_ATRIB", "OP_ADIT", "OP_MULT", "OP_REL", "ABRE_PARENT", "FECHA_PARENT", "PONTO_VIRG", 
+  "VIRG", "ABRE_CHAVES", "FECHA_CHAVES", "CARACTER", "STRING", "OP_BIT_A_BIT_AND", "OP_BIT_A_BIT_OR", "OP_LOGICO", "OP_CASE", "ABRE_COLC", "FECHA_COLC", "PONTO", "OP_MINUS", "OP_MINUSMINUS", "OP_PONT", "OP_PLUSPLUS", "DOT_DOT","OP_NOT","OP_DIV", "FIM"
 };
 
 
@@ -39,7 +39,6 @@ char isKeyword (char *s)
 {
   int i, f, m;
   int x;
-
   i=0; f=nKeywords-1;
   while(i<=f){
     m=(i+f)/2;

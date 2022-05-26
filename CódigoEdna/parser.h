@@ -20,7 +20,7 @@ void T();
 void F();
 void E_();
 void T_();
-void CASE();
+void F_CASE();
 void CASE_();
 void CASE_CONDICAO();
 void C_();
