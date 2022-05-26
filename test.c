@@ -2,10 +2,11 @@
 
 int main (void) {
     int num = 2;
-	switch((1)) {
+	switch((((1)))) {
 		case 1: break;
 		case 2:
 		case 3:
+			printf("Oi\n");
 	}
 	printf("FIM\n");
 }

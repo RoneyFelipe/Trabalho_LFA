@@ -32,6 +32,19 @@ Gramática da linguagem aceita pelo parser:
  Atualmente, nao ha controle sobre a coluna e a linha em que o erro foi encontrado.
 */
 
+/*------------------------------- IMPLEMENTACAO DO COMANDO CASE E BREAK -------------------------------*/
+
+/*Grupo: Loucos, Fracos e Atormentados (LFA)*/
+/*Autores: 
+  
+  FERNANDA DAS NEVES MERQUEADES SANTOS
+  GIOVANNA RODRIGUES MENDES
+  MATHEUS FELIPE ALVES DURÃES
+  RONEY FELIPE DE OLIVEIRA MIRANDA
+  NOTA: 10, não precisa nem corrigir!
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "lex.h"
@@ -271,10 +284,10 @@ void F(){
 
 }
 
-/* F_CASE -> CASE_CONDICAO CASE_, 
-        | CASE_CONDICAO C,
-        | Epsilon */
-/*Analisa o corpo do case ou  default*/
+/* F_CASE -> case CASE_CONDICAO CASE_ */ 
+/*            | default: C  */
+/*            | Epsilon          */
+/* Producao incubida por analisar o case, tanto o termo quanto a condicao, ou default*/
 void F_CASE() {
   
   if (lookahead == CASE) {
@@ -288,54 +301,44 @@ void F_CASE() {
   else if (lookahead == DEFAULT) {
 
     match(DEFAULT);
-    // O case condição não está aqui pois o default não tem condição já que ele é a opção de queda quando nenhuma
-    // outra condição é atendida
     match(DOT_DOT);
     C();
 
-    if (lookahead == BREAK) {
-
-      match(BREAK);
-      match(PONTO_VIRG);
-      
-    }
+    QUEBRAR();
 
   }
 
 }
 
-/* CASE_ -> F_CASE
-          | C F_CASE  */
-/*Funcao responsavel por ler o corpo do case, ela não analisa o termo CASE responsvel pela chamada de 
+/* CASE_ ->   F_CASE            */
+/*          | QUEBRAR F_CASE    */
+/*          | C QUEBRAR F_CASE  */
+/* Producao responsavel por ler o corpo do case, ela não analisa o termo CASE responsavel pela chamada de 
 F_case() e nem a condicao de tal. */
 void CASE_() {
 
-  /*Se um novo termo CASE for encontrado, a funcao F_case() deve ser conjurada para que a analise seja feita. */
+  /*Se um novo termo CASE for encontrado, a producao F_case() deve ser conjurada para que a analise seja feita. */
   if (lookahead == CASE) {
 
     F_CASE();
 
   } 
   
-  /**/
+  /* Se ele encontrar um BREAK entao chamara a producao QUEBRAR() em sequencia F_CASE() */
   else if (lookahead == BREAK) {
 
-    match(BREAK);
-    match(PONTO_VIRG);
+    QUEBRAR();
     F_CASE();
 
   } 
   
+  /* Se nenhuma das condicoes for atendida entao havera um corpo,
+    depois de verificar o corpo chamara a producao QUEBRAR() em sequencia F_CASE() */
   else {
 
     C();
 
-    if (lookahead == BREAK) {
-
-      match(BREAK);
-      match(PONTO_VIRG);
-
-    }
+    QUEBRAR();
 
     F_CASE();
 
@@ -343,12 +346,13 @@ void CASE_() {
 
 }
 
-/* CASE_CONDICAO -> C_    */
-/*Analisa a condicao do case*/
+/* CASE_CONDICAO -> (C_):  */
+/*                | C_:    */
+/* Producao responsavel por analisar a condicao do case*/
 void CASE_CONDICAO() {
 
-  /*Se lookahead for igual a um abre parenteses, verificamos o abre parenteses, analisamos o corpo da expressao*/
-  /*e verificamos o fechamento de parenteses*/
+  /* Se lookahead for igual a um abre parenteses, verificamos o abre parenteses, analisamos o corpo da expressao*/
+  /* e verificamos o fechamento de parenteses. */
   if (lookahead == ABRE_PARENT) {
 
       match(ABRE_PARENT);
@@ -357,8 +361,8 @@ void CASE_CONDICAO() {
       match(DOT_DOT);
 
   }
-  /*Se lookahead nao for igual a abre parenteses, significa que já estamos no corpo da condição. Então, verificamos*/
-  /*o corpo da condicao e os dois pontos*/
+  /* Se lookahead nao for igual a abre parenteses, significa que já estamos no corpo da condição. Então, verificamos*/
+  /* o corpo da condicao e os dois pontos.*/
   else {
 
     C_();
@@ -368,13 +372,17 @@ void CASE_CONDICAO() {
 
 }
 
-/* C_ -> EXP_CASE */
-/*Funcao responsavel por verificar se o que foi lido e uma variavel ou um valor real.*/
+/* C_ -> ( id EXP_CASE )   */
+/*      | id EXP_CASE      */
+/*      | ( num EXP_CASE ) */
+/*      | num EXP_CASE     */
+/* Producao responsavel por verificar se o que foi lido e uma variavel ou um valor real.*/
 void C_() {
 
-  /*Se lookahead for igual a uma variavel*/
+  /* Se lookahead for igual a uma variavel */
   if (lookahead == ID) {
-
+    
+    /* Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((variavel)) */
     if(lookahead == ABRE_PARENT){
     
       match(ABRE_PARENT);
@@ -383,7 +391,7 @@ void C_() {
       match(FECHA_PARENT);
       
     } 
-    /*Se lookahead for igual a um valor real.*/
+    // Ou somente uma variavel, exemplo: variavel
     else {
       
       match(ID);
@@ -392,28 +400,36 @@ void C_() {
     }
     
   }
-
+  /* Se lookahead for igual a um valor real. */
   else {
 
-    /*Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((13)) */
-    if(lookahead == ABRE_PARENT){
+    /* Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((13)) */
+    if(lookahead == ABRE_PARENT) {
+
       match(ABRE_PARENT);
       match(NUM);
       EXP_CASE();
       match(FECHA_PARENT);
+
     } 
     
     else {
+      /* Caso não haja uma nova abertura de parenteses dentro da condicao do switch, interpretar apenas o valor real. */
       match(NUM);
       EXP_CASE();
+
     }
 
   }
 
 }
 
-/* EXP_CASE -> C_ 
+/* EXP_CASE ->  +C_
+              | *C_
+              | -C_
+              | /C_
               | Epsilon      */
+/*Producao responsavel por verificar os operando*/
 void EXP_CASE() {
   
   if (lookahead == OP_ADIT) {
@@ -443,8 +459,23 @@ void EXP_CASE() {
     C_();
 
   }
-  // VAZIA
+  
 }
+
+/* QUEBRAR -> break;    */
+/*           | Epsilon  */
+/* Producao responsavel por verificar todos os breaks compilados*/
+void QUEBRAR() {
+
+  if(lookahead == BREAK) {
+
+    match(BREAK);
+    match(PONTO_VIRG);
+
+  }
+
+}    
+
 
 
 /*******************************************************************************************

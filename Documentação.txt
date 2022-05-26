@@ -53,15 +53,17 @@ T_(): (NUMERO OU VARIAVEL) OP_MULT (NUMERO OU VARIAVEL ) | Epsilon
 
 E_(): (NUMERO OU VARIAVEL) OP_ADIT (NUMERO OU VARIAVEL ) | Epsilon
 
-CASE(): Produção que implementa o case.
+F_CASE(): Analisa tanto o 'case' como o 'default'.
 
-CASE_(): 
+CASE_(): Analisa o que está dentro do 'case', no corpo desse.
 
 C_(): ID ou num que está entre o 'case' e o ':'.
 
 EXP_CASE(): Expressão que está entre o 'case' e o ':'.
 
-CASE_CONDICAO(): Está entre o 'case' e o ':' chamando o C_().
+CASE_CONDICAO(): Condição que está entre o 'case' e o ':' chamando o C_().
+
+QUEBRAR(): Aferi os 'break's e os ':'.
 
 
 /-----------------------------------------------------------/
@@ -75,3 +77,19 @@ Iniciamos no lookahead:
             ->Function_
                 ->Chama o match();
                     ->Chama o lex () //Começa tudo de novo, outra vez.
+
+/-----------------------------------------------------------/
+Linha de chamada da compilacao do termo CASE e BREAK:
+
+    Comando CASE lido:
+    -> F_case()
+        ->CASE_CONDICAO()
+            Pode ir para ->C_()
+                            ->EXP_CASE()
+        ->CASE_()
+            Pode ir para ->F_CASE()
+        ->QUEBRAR()
+
+
+
+
