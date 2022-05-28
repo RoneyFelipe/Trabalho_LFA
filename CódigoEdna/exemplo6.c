@@ -1,7 +1,7 @@
 int main() {
-    Giovanna = 0;
+    var1 = 0;
 
-    switch (Giovanna) {
+    switch (var1) {
         case 1: 
             a = 10;
             break;

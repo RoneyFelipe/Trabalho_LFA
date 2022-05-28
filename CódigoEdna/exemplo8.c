@@ -1,10 +1,10 @@
 
 int main() {
 
-    Giovanna = 0;
-    RoneyLindo = 1;
+    var1 = 0;
+    var2 = 1;
 
-    switch (RoneyLindo) {
+    switch (var1) {
 
         default:
             d = 40;

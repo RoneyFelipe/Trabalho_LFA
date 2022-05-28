@@ -171,6 +171,7 @@ void B() {
 /*
  C -> id = E ; 
       | while (E) C 
+      | switch (C_) { F_CASE }
       | { B }
 */
 void C() {
@@ -284,16 +285,32 @@ void F(){
 
 }
 
-/* F_CASE -> case CASE_CONDICAO CASE_ */ 
-/*            | default: C  */
-/*            | Epsilon          */
+/* F_CASE ->   case (C_): CASE_ */ 
+/*           | case C_: CASE_   */
+/*           | default: C       */
+/*           | Epsilon          */
 /* Producao incubida por analisar o case, tanto o termo quanto a condicao, ou default*/
 void F_CASE() {
   
   if (lookahead == CASE) {
 
     match(CASE);
-    CASE_CONDICAO();
+    
+    /* Se possui um abre parenteses inicial na condicao de case */
+    if(lookahead == ABRE_PARENT) {
+
+      match(ABRE_PARENT);
+      C_();
+      match(FECHA_PARENT);
+
+    /* Senao pegue somente a condicional para o case */
+    } else {
+
+      C_();
+
+    }
+
+    match(DOT_DOT);
     CASE_();
 
   } 
@@ -346,92 +363,36 @@ void CASE_() {
 
 }
 
-/* CASE_CONDICAO -> (C_):  */
-/*                | C_:    */
-/* Producao responsavel por analisar a condicao do case*/
-void CASE_CONDICAO() {
-
-  /* Se lookahead for igual a um abre parenteses, verificamos o abre parenteses, analisamos o corpo da expressao*/
-  /* e verificamos o fechamento de parenteses. */
-  if (lookahead == ABRE_PARENT) {
-
-      match(ABRE_PARENT);
-      C_();
-      match(FECHA_PARENT);
-      match(DOT_DOT);
-
-  }
-  /* Se lookahead nao for igual a abre parenteses, significa que já estamos no corpo da condição. Então, verificamos*/
-  /* o corpo da condicao e os dois pontos.*/
-  else {
-
-    C_();
-    match(DOT_DOT);
-
-  }
-
-}
-
-/* C_ -> ( id EXP_CASE )   */
-/*      | id EXP_CASE      */
-/*      | ( num EXP_CASE ) */
-/*      | num EXP_CASE     */
+/* C_ ->  id EXP_CASE       */
+/*      | num EXP_CASE      */
 /* Producao responsavel por verificar se o que foi lido e uma variavel ou um valor real.*/
 void C_() {
 
   /* Se lookahead for igual a uma variavel */
   if (lookahead == ID) {
-    
-    /* Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((variavel)) */
-    if(lookahead == ABRE_PARENT){
-    
-      match(ABRE_PARENT);
-      match(ID);
-      EXP_CASE();
-      match(FECHA_PARENT);
-      
-    } 
-    // Ou somente uma variavel, exemplo: variavel
-    else {
-      
+
       match(ID);
       EXP_CASE();
 
-    }
-    
   }
   /* Se lookahead for igual a um valor real. */
   else {
 
-    /* Caso haja uma nova abertura de parenteses dentro da condicao do switch, exemplo: ((13)) */
-    if(lookahead == ABRE_PARENT) {
-
-      match(ABRE_PARENT);
-      match(NUM);
-      EXP_CASE();
-      match(FECHA_PARENT);
-
-    } 
-    
-    else {
-      /* Caso não haja uma nova abertura de parenteses dentro da condicao do switch, interpretar apenas o valor real. */
-      match(NUM);
-      EXP_CASE();
-
-    }
+    match(NUM);
+    EXP_CASE();
 
   }
 
 }
 
-/* EXP_CASE ->  +C_
-              | *C_
-              | -C_
-              | /C_
-              | Epsilon      */
-/*Producao responsavel por verificar os operando*/
+/* EXP_CASE ->   +C_       */      
+/*             | *C_       */
+/*             | -C_       */
+/*             | /C_       */
+/*             | Epsilon   */
+/* Producao responsavel por verificar os operando */
 void EXP_CASE() {
-  
+
   if (lookahead == OP_ADIT) {
 
     match(OP_ADIT);
@@ -475,7 +436,6 @@ void QUEBRAR() {
   }
 
 }    
-
 
 
 /*******************************************************************************************

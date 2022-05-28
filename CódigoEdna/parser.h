@@ -22,7 +22,6 @@ void E_();
 void T_();
 void F_CASE();
 void CASE_();
-void CASE_CONDICAO();
 void C_();
 void EXP_CASE();
 void QUEBRAR();

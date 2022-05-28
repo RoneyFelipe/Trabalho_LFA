@@ -1,7 +1,7 @@
 int main() {
 	switch(1){
 		case 0:
-		case (1 + (2 + (3))):
+		case (1 * 3 + 2):
 			break;
 	}
 }
